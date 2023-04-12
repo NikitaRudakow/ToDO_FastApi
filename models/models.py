@@ -7,8 +7,7 @@ task = Table(
     metadata,
     Column("id", Integer, primary_key=True),
     Column("description", String, nullable=False),
-    Column("done", Boolean),
-    Column("subtask_id", Integer, ForeignKey("subtask.id"))
+    Column("done", Boolean)
 )
 
 subtask = Table(
@@ -17,6 +16,6 @@ subtask = Table(
     Column("id", Integer, primary_key=True),
     Column("description", String, nullable=False),
     Column("done", Boolean), 
-    # Column("task_id", Integer, ForeignKey("task.id"))
+    Column("task_id", Integer, ForeignKey("task.id"))
 )
 
