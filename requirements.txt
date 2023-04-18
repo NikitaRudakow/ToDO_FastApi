@@ -7,4 +7,12 @@ uvicorn==0.21.1
 python-dotenv==1.0.0
 asyncpg
 greenlet
-fastapi_pagination
+httpx
+pytest-asyncio
+anyio
+pytest-tornasync
+pytest-trio
+pytest-twisted
+twisted
+gunicorn
+psycopg2
