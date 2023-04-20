@@ -4,14 +4,10 @@ from httpx import AsyncClient
 
 @pytest.mark.asyncio
 async def test_add_task(ac: AsyncClient):
-    response = await ac.post("http://127.0.0.1:8000/tasks", json={
+    response = await ac.post("/tasks", json={
         "description": "Сходить в магазин",
         "done": False,
         "subtasks": [
-            {
-                "description": "купить молоко",
-                "done": False
-            },
             {
                 "description": "купить хлеб",
                 "done": False
@@ -22,33 +18,18 @@ async def test_add_task(ac: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_get_all_tasks(ac: AsyncClient):
-    response = await ac.get("http://127.0.0.1:8000/tasks", params={
+async def test_get_tasks(ac: AsyncClient):
+    response = await ac.get("/tasks", params={
         "page": 1,
-        "page_size": 10
+        "page_size": 10,
+        "done": True
     })
     assert response.status_code == 200
 
 
 @pytest.mark.asyncio
-async def test_get_one_tasks(ac: AsyncClient):
-    response = await ac.get("http://127.0.0.1:8000/tasks/1", params={
-        "task_id": 1
-    })
-    assert response.status_code == 200
-
-
-@pytest.mark.asyncio
-async def test_delete_task(ac: AsyncClient):
-    response = await ac.delete("http://127.0.0.1:8000/tasks/1", params={
-        "task_id": 1
-    })
-    assert response.status_code == 200
-
-
-@pytest.mark.asyncio
-async def test_delete_task(ac: AsyncClient):
-    response = await ac.delete("http://127.0.0.1:8000/tasks/1", params={
+async def test_get_task_by_id(ac: AsyncClient):
+    response = await ac.get("/tasks/1", params={
         "task_id": 1
     })
     assert response.status_code == 200
@@ -56,18 +37,37 @@ async def test_delete_task(ac: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_update_task(ac: AsyncClient):
-    response = await ac.put(
-        "http://127.0.0.1:8000/tasks/4", params={"task_id": 4},
-        json={
+    response = await ac.put("/tasks/1", params={"task_id": 1}, json={
             "description": "Сходить в магазин",
             "done": True,
             "subtasks": [
                 {
-                    "id": 7,
+                    "id": 1,
                     "description": "купить кефир",
                     "done": True
                 }
             ]
         }
     )
-    assert response.status_code == 200
+    asserted_response = {
+        'id': 1, 
+        'description': 'Сходить в магазин',
+        'done': True,
+        'subtasks': [
+            {
+                'id': 1, 
+                'description': "купить кефир", 
+                'done': True
+            }
+        ]
+    }
+    print(response.json())
+    assert response.json() == asserted_response
+
+
+@pytest.mark.asyncio
+async def test_delete_task(ac: AsyncClient):
+    response = await ac.delete("/tasks/1", params={
+        "task_id": 1
+    })
+    assert response.json() == {"message": "Task deleted"}

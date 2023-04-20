@@ -1,11 +1,24 @@
 # ToDO_FastApi
 
-run development server MacOS
+## Installation process
 
+To run the service locally you need to install docker
+
+run development server MacOS:
 ```sh
-docker compose -f docker-compose.yml up
+docker compose up --build
 ```
 
-run tests
+install dependencies:
 ```sh
- docker compose -f docker-compose.test.yml run --rm app pytest -s
+pip install -r requirements.txt
+```
+
+run migrations:
+```sh
+alembic upgrade head
+```
+run tests:
+```sh
+pytest -v -s tests
+```
