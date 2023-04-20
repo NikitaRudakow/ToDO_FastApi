@@ -38,25 +38,25 @@ async def test_get_task_by_id(ac: AsyncClient):
 @pytest.mark.asyncio
 async def test_update_task(ac: AsyncClient):
     response = await ac.put("/tasks/1", params={"task_id": 1}, json={
-            "description": "Сходить в магазин",
-            "done": True,
-            "subtasks": [
-                {
-                    "id": 1,
-                    "description": "купить кефир",
-                    "done": True
-                }
-            ]
-        }
+        "description": "Сходить в магазин",
+        "done": True,
+        "subtasks": [
+            {
+                "id": 1,
+                "description": "купить кефир",
+                "done": True
+            }
+        ]
+    }
     )
     asserted_response = {
-        'id': 1, 
+        'id': 1,
         'description': 'Сходить в магазин',
         'done': True,
         'subtasks': [
             {
-                'id': 1, 
-                'description': "купить кефир", 
+                'id': 1,
+                'description': "купить кефир",
                 'done': True
             }
         ]

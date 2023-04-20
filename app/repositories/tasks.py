@@ -11,16 +11,16 @@ async def check_task_existence(task_id: int) -> bool:
     async with session.begin():
         result = await session.get(Task, task_id)
     return result
-        
+
 
 async def get_tasks(page: int, page_size: int, done_task: bool) -> List[Task]:
     session = async_session_maker()
     async with session.begin():
-        query = select(Task)\
-                .where(Task.done==done_task)\
-                .options(selectinload(Task.subtasks))\
-                .offset((page - 1) * page_size)\
-                .limit(page_size)
+        query = select(Task) \
+            .where(Task.done == done_task) \
+            .options(selectinload(Task.subtasks)) \
+            .offset((page - 1) * page_size) \
+            .limit(page_size)
         result = await session.scalars(query)
     return result.all()
 
@@ -29,8 +29,8 @@ async def get_task_by_id(task_id: int):
     session = async_session_maker()
     async with session.begin():
         query = select(Task) \
-                .where(Task.id == task_id)\
-                .options(selectinload(Task.subtasks))
+            .where(Task.id == task_id) \
+            .options(selectinload(Task.subtasks))
         result = await session.scalar(query)
     await session.close()
     return result
@@ -59,20 +59,37 @@ async def delete_task(task_id: int):
         query = delete(Task).where(Task.id == task_id)
         result = await session.execute(query)
     await session.close()
-    
 
 
 async def update_task(task_id: int, task_data: TaskUpdateSchema):
     session = async_session_maker()
+    subtasks = []
     async with session.begin():
-        query = update(Task).values(description=task_data.description, done=task_data.done).where(Task.id == task_id)
+        query = update(Task).values(description=task_data.description, done=task_data.done) \
+            .where(Task.id == task_id) \
+            .returning(Task.id, Task.description, Task.done)
         result = await session.execute(query)
+        updated_task_data = result.fetchone()
         for subtask_data in task_data.subtasks:
             subtask_id = subtask_data.id
             if subtask_id:
-                query = update(SubTask).values(description=subtask_data.description, done=subtask_data.done).where(
-                    SubTask.id == subtask_id)
-                await session.execute(query)
+                query = update(SubTask).values(description=subtask_data.description, done=subtask_data.done) \
+                    .where(SubTask.id == subtask_id) \
+                    .returning(SubTask.id, SubTask.description, SubTask.done)
+                result = await session.execute(query)
+                updated_subtask_data = result.fetchone()
+                subtasks.append(
+                    {
+                        "id": updated_subtask_data[0],
+                        "description": updated_subtask_data[1],
+                        "done": updated_subtask_data[2]
+                    }
+                )
         await session.commit()
-    updated_task = await get_task_by_id(task_id)
-    return updated_task
+    result = {
+        "id": updated_task_data[0],
+        "description": updated_task_data[1],
+        "done": updated_task_data[2],
+        "subtasks": subtasks
+    }
+    return result
