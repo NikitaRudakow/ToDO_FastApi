@@ -4,15 +4,16 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+from models.tasks import Task #Иначе проблемы с миграциями(создаются пустые)
+from config import POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_PORT
+from database import Base, metadata
 
-from config import DB_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_PORT
-from models.models import metadata
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 section = config.config_ini_section
-config.set_section_option(section, "DB_HOST", DB_HOST)
+config.set_section_option(section, "POSTGRES_HOST", POSTGRES_HOST)
 config.set_section_option(section, "POSTGRES_DB", POSTGRES_DB)
 config.set_section_option(section, "POSTGRES_USER", POSTGRES_USER)
 config.set_section_option(section, "POSTGRES_PASSWORD", POSTGRES_PASSWORD)
@@ -26,7 +27,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = metadata
+target_metadata = Base.metadata
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
